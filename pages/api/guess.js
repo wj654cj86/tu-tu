@@ -33,17 +33,17 @@ function gettxtfile(url) {
 	});
 }
 
-const 獎金 = 10000;
-
 export default async function handler(req, res) {
-	let { urlkey, key, streamer, player, answer, token } = req.query;
+	let { bonus, streamer, player, answer, token, urlkey, key } = req.query;
 	try {
 		const supabase = createClient(
 			`https://${urlkey}.supabase.co`,
 			key
 		);
+		if (bonus === undefined || bonus == "") throw 'error';
 		if (streamer === undefined || streamer == "") throw 'error';
 		if (player === undefined || player == "") throw 'error';
+		if (token === undefined || token == "") throw 'error';
 		let { data } = await supabase.from("guess").select();
 		let one = data.find(element => element.name == streamer);
 		if (one === undefined) {
@@ -55,6 +55,7 @@ export default async function handler(req, res) {
 		let 猜測 = answer;
 		let 輸出 = '';
 		let 答案 = one.answer;
+		let 獎金 = bonus;
 		if (猜測 == 'null' || 猜測 == null) {
 			輸出 = '你沒有給數字！';
 		} else if (猜測.length != 4) {
