@@ -33,6 +33,10 @@ function gettxtfile(url) {
 	});
 }
 
+let 點數列表 = {
+	'sulen0820': '喵喵幣'
+};
+
 export default async function handler(req, res) {
 	let { bonus, streamer, player, answer, token, urlkey, key } = req.query;
 	try {
@@ -40,10 +44,15 @@ export default async function handler(req, res) {
 			`https://${urlkey}.supabase.co`,
 			key
 		);
-		if (bonus === undefined || bonus == "") throw 'error';
+		let 獎金;
+		if (bonus === undefined || bonus == "" || bonus == "0") {
+			獎金 = "0";
+		} else {
+			if (token === undefined || token == "") throw 'error';
+			獎金 = bonus;
+		}
 		if (streamer === undefined || streamer == "") throw 'error';
 		if (player === undefined || player == "") throw 'error';
-		if (token === undefined || token == "") throw 'error';
 		let { data } = await supabase.from("guess").select();
 		let one = data.find(element => element.name == streamer);
 		if (one === undefined) {
@@ -55,7 +64,7 @@ export default async function handler(req, res) {
 		let 猜測 = answer;
 		let 輸出 = '';
 		let 答案 = one.answer;
-		let 獎金 = bonus;
+		let 點數 = streamer in 點數列表 ? 點數列表[streamer] : '點';
 		if (猜測 == 'null' || 猜測 == null) {
 			輸出 = '你沒有給數字！';
 		} else if (猜測.length != 4) {
@@ -81,8 +90,12 @@ export default async function handler(req, res) {
 				輸出 += '0A';
 			if (a == 4) {
 				await supabase.from("guess").update({ answer: 出題() }).match({ name: streamer });
-				輸出 = `恭喜你猜中數字！獲得${獎金}喵喵幣！`;
-				await gettxtfile(`https://api.jebaited.net/addPoints/${token}/${player}/${獎金}`);
+				if (獎金 == "0") {
+					輸出 = `恭喜你猜中數字！`;
+				} else {
+					輸出 = `恭喜你猜中數字！獲得${獎金}${點數}！`;
+					await gettxtfile(`https://api.jebaited.net/addPoints/${token}/${player}/${獎金}`);
+				}
 			}
 		}
 		res.status(200).json(輸出);
