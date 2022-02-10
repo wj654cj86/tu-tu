@@ -76,8 +76,10 @@ export default async function handler(req, res) {
 		let 答案 = one.answer;
 		if (猜測 == 'null' || 猜測 == null) {
 			輸出 = '你沒有給數字！';
+		} else if (isNaN(猜測)) {
+			輸出 = '別騙我，你給的不是數字！';
 		} else if (猜測.length != 4) {
-			輸出 = '你給的數字有錯！';
+			輸出 = '你給的數字長度有錯！';
 		} else if (重複數字(猜測)) {
 			輸出 = '你給到重覆數字，不給你提示！';
 		} else {
