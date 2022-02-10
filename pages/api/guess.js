@@ -33,38 +33,47 @@ function gettxtfile(url) {
 	});
 }
 
-let 點數列表 = {
-	'sulen0820': '喵喵幣'
-};
-
 export default async function handler(req, res) {
-	let { bonus, streamer, player, answer, token, urlkey, key } = req.query;
+	let { bonus, points, streamer, player, answer, token, urlkey, key } = req.query;
 	try {
 		const supabase = createClient(
 			`https://${urlkey}.supabase.co`,
 			key
 		);
 		let 獎金;
+		let 點數;
 		if (bonus === undefined || bonus == "" || bonus == "0") {
 			獎金 = "0";
 		} else {
 			if (token === undefined || token == "") throw 'error';
 			獎金 = bonus;
 		}
+		if (points === undefined || points == "") {
+			點數 = '點';
+		} else {
+			點數 = points;
+		}
 		if (streamer === undefined || streamer == "") throw 'error';
 		if (player === undefined || player == "") throw 'error';
 		let { data } = await supabase.from("guess").select();
 		let one = data.find(element => element.name == streamer);
 		if (one === undefined) {
-			one = { name: streamer, answer: 出題() };
+			one = { name: streamer, answer: 出題(), points: 點數 };
 			await supabase.from("guess").insert(one);
 			data = (await supabase.from("guess").select()).data;
 			one = data.find(element => element.name == streamer);
 		}
+		if (點數 == '點') {
+			點數 = one.points;
+		} else if (點數 == 'reset') {
+			await supabase.from("guess").update({ points: '點' }).match({ name: streamer });
+			點數 = '點';
+		} else {
+			await supabase.from("guess").update({ points: 點數 }).match({ name: streamer });
+		}
 		let 猜測 = answer;
 		let 輸出 = '';
 		let 答案 = one.answer;
-		let 點數 = streamer in 點數列表 ? 點數列表[streamer] : '點';
 		if (猜測 == 'null' || 猜測 == null) {
 			輸出 = '你沒有給數字！';
 		} else if (猜測.length != 4) {
