@@ -289,7 +289,7 @@ export default async function handler(req, res) {
 	let language = param.language;
 	if (languages.indexOf(language) == -1) language = 'zh-TW';
 	let name = param.name;
-	if (name === undefined || name == "") name = param.streamer;
+	if (name === undefined || name == "" || name == "null") name = param.streamer;
 	let namel;
 	let nameu;
 	let obj;
