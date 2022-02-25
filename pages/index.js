@@ -23,15 +23,15 @@ export default function Home() {
 				<div className={styles.grid}>
 					<a href="https://www.twitch.tv/wj654cj86" className={styles.card}>
 						<h2>屠屠圖奇</h2>
-						<p>屠屠的圖奇實況連結。.</p>
+						<p>屠屠的圖奇實況連結。</p>
 					</a>
 					<a href="https://www.youtube.com/c/%E5%B1%A0%E5%BF%97%E8%8F%AF" className={styles.card}>
 						<h2>屠屠Youtube</h2>
-						<p>屠屠的Youtube連結。.</p>
+						<p>屠屠的Youtube連結。</p>
 					</a>
 					<a href="https://www.facebook.com/wj654cj86/" className={styles.card}>
 						<h2>屠屠臉書</h2>
-						<p>屠屠的臉書連結。.</p>
+						<p>屠屠的臉書連結。</p>
 					</a>
 				</div>
 			</main>
