@@ -10,5 +10,5 @@ export default async function handler(req, res) {
 		帳號 = name.toLowerCase();
 		暱稱 = name;
 	}
-	res.status(200).json(`{'account':${暱稱},'nickname':${帳號}}`);
+	res.status(200).json(`let s = {'account':${暱稱},'nickname':${帳號}}`);
 }
