@@ -25,8 +25,6 @@ function 洗牌() {
 }
 洗牌();
 export default async function handler(req, res) {
-	let 抽獎人 = req.query.u;
-	let token = req.query.t;
 	let 抽髮型 = 保底表[順序++];
 	if (順序 >= 總和) {
 		順序 = 0;
