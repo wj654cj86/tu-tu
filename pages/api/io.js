@@ -271,69 +271,62 @@ let languagedata = {
 	'分': { 'en': '', 'zh-TW': '分' },
 	'page': { 'en': 'Player page', 'zh-TW': '個人頁面' },
 };
-
-function gettxtfile(url) {
-	return new Promise((resolve, reject) => {
-		fetch(url)
-			.then((response) => {
-				return response.text();
-			})
-			.then((text) => {
-				resolve(text);
-			});
-	});
-}
+let loadfile = (type, url) => fetch(url).then(r => r[type]());
 
 export default async function handler(req, res) {
-	let param = req.query;
-	let language = param.language;
-	if (languages.indexOf(language) == -1) language = 'zh-TW';
-	let name = param.name;
-	if (name === undefined || name == "" || name == "null") name = param.streamer;
-	let namel;
-	let nameu;
-	let obj;
-	while (1) {
-		namel = name.toLowerCase();
-		nameu = name.toUpperCase();
-		obj = JSON.parse(await gettxtfile("https://ch.tetr.io/api/users/" + namel));
-		if (obj.success == true) break;
-		if (name == param.streamer)
-			name = 'tu-tu';
-		else
-			name = param.streamer;
-	}
-	let data = obj.data;
-	let data2 = JSON.parse(await gettxtfile("https://ch.tetr.io/api/users/" + namel + '/records')).data;
-	let league = data.user.league;
-	let outarr = [];
-	if (league.rank != 'z') {
-		outarr.push(`${languagedata.rank[language]}: ${league.rank.toUpperCase()}`);
-	}
-	if (league.rating != -1) {
-		outarr.push(`TR: ${league.rating.toFixed(0)}`);
-		outarr.push(`Glicko: ${league.glicko.toFixed(0)}+${league.rd.toFixed(0)}`);
-	}
-	if (league.rank != 'z') {
-		outarr.push(`${languagedata.world[language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing + languagedata.名[language]}`);
-		if (data.user.country !== null) {
-			outarr.push(`${Countries[data.user.country][language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing_local + languagedata.名[language]}`);
+	try {
+		let param = req.query;
+		let language = param.language;
+		if (languages.indexOf(language) == -1) language = 'zh-TW';
+		let name = param.name;
+		if (name === undefined || name == "" || name == "null") name = param.streamer;
+		let namel;
+		let nameu;
+		let obj;
+		while (1) {
+			namel = name.toLowerCase();
+			nameu = name.toUpperCase();
+			obj = await loadfile('json', "https://ch.tetr.io/api/users/" + namel);
+			if (obj.success == true) break;
+			if (name == param.streamer)
+				name = 'tu-tu';
+			else
+				name = param.streamer;
 		}
-	}
-	if (league.apm != null) {
-		outarr.push(`APM: ${league.apm}`);
-		outarr.push(`PPS: ${league.pps}`);
-		outarr.push(`VS: ${league.vs}`);
-	}
-	if (data2.records != null) {
-		if (data2.records['40l'].record != null) {
-			outarr.push(`${languagedata['40l'][language]}: ${(data2.records['40l'].record.endcontext.finalTime / 1000).toFixed(3)}s`);
+		let data = obj.data;
+		let data2 = await loadfile('json', "https://ch.tetr.io/api/users/" + namel + '/records').data;
+		let league = data.user.league;
+		let outarr = [];
+		if (league.rank != 'z') {
+			outarr.push(`${languagedata.rank[language]}: ${league.rank.toUpperCase()}`);
 		}
-		if (data2.records['blitz'].record != null) {
-			outarr.push(`Blitz: ${data2.records['blitz'].record.endcontext.score.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") + languagedata.分[language]}`);
+		if (league.rating != -1) {
+			outarr.push(`TR: ${league.rating.toFixed(0)}`);
+			outarr.push(`Glicko: ${league.glicko.toFixed(0)}+${league.rd.toFixed(0)}`);
 		}
-	}
-	outarr.push(`${languagedata.page[language]}: https://ch.tetr.io/u/${namel}`);
+		if (league.rank != 'z') {
+			outarr.push(`${languagedata.world[language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing + languagedata.名[language]}`);
+			if (data.user.country !== null) {
+				outarr.push(`${Countries[data.user.country][language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing_local + languagedata.名[language]}`);
+			}
+		}
+		if (league.apm != null) {
+			outarr.push(`APM: ${league.apm}`);
+			outarr.push(`PPS: ${league.pps}`);
+			outarr.push(`VS: ${league.vs}`);
+		}
+		if (data2.records != null) {
+			if (data2.records['40l'].record != null) {
+				outarr.push(`${languagedata['40l'][language]}: ${(data2.records['40l'].record.endcontext.finalTime / 1000).toFixed(3)}s`);
+			}
+			if (data2.records['blitz'].record != null) {
+				outarr.push(`Blitz: ${data2.records['blitz'].record.endcontext.score.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") + languagedata.分[language]}`);
+			}
+		}
+		outarr.push(`${languagedata.page[language]}: https://ch.tetr.io/u/${namel}`);
 
-	res.status(200).json(`${nameu} => ` + outarr.join(', '))
+		res.status(200).json(`${nameu} => ` + outarr.join(', '));
+	} catch (e) {
+		res.status(200).json(`指令暫時錯誤，無法讀取IO官方資料。`);
+	}
 }
