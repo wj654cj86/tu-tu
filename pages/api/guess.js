@@ -21,18 +21,6 @@ function 重複數字(猜測) {
 	return false;
 }
 
-function gettxtfile(url) {
-	return new Promise((resolve, reject) => {
-		fetch(url)
-			.then((response) => {
-				return response.text();
-			})
-			.then((text) => {
-				resolve(text);
-			});
-	});
-}
-
 export default async function handler(req, res) {
 	let { bonus, points, streamer, player, answer, token, urlkey, key } = req.query;
 	try {
@@ -105,7 +93,7 @@ export default async function handler(req, res) {
 					輸出 = `恭喜你猜中數字！`;
 				} else {
 					輸出 = `恭喜你猜中數字！獲得${獎金}${點數}！`;
-					await gettxtfile(`https://api.jebaited.net/addPoints/${token}/${player}/${獎金}`);
+					await fetch(`https://api.jebaited.net/addPoints/${token}/${player}/${獎金}`);
 				}
 			}
 		}

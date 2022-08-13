@@ -294,7 +294,7 @@ export default async function handler(req, res) {
 				name = param.streamer;
 		}
 		let data = obj.data;
-		let data2 = await loadfile('json', "https://ch.tetr.io/api/users/" + namel + '/records').data;
+		let data2 = (await loadfile('json', "https://ch.tetr.io/api/users/" + namel + '/records')).data;
 		let league = data.user.league;
 		let outarr = [];
 		if (league.rank != 'z') {
