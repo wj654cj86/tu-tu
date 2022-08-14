@@ -21,7 +21,7 @@ function 重複數字(猜測) {
 	return false;
 }
 
-export default async function handler(req, res) {
+export default async function (req, res) {
 	let { bonus, points, streamer, player, answer, token, urlkey, key } = req.query;
 	try {
 		const supabase = createClient(

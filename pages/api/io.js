@@ -271,30 +271,29 @@ let languagedata = {
 	'分': { 'en': '', 'zh-TW': '分' },
 	'page': { 'en': 'Player page', 'zh-TW': '個人頁面' },
 };
-let loadfile = (type, url) => fetch(url).then(r => r[type]());
 
-export default async function handler(req, res) {
+let loadjson = url => fetch(url).then(r => r.json());
+
+export default async function (req, res) {
+	let { language, streamer, name } = req.query;
 	try {
-		let param = req.query;
-		let language = param.language;
 		if (languages.indexOf(language) == -1) language = 'zh-TW';
-		let name = param.name;
-		if (name === undefined || name == "" || name == "null") name = param.streamer;
+		if (streamer === undefined || streamer == "" || streamer == "null") streamer = 'tu-tu';
+		if (name === undefined || name == "" || name == "null") name = streamer;
 		let namel;
 		let nameu;
 		let obj;
 		while (1) {
 			namel = name.toLowerCase();
 			nameu = name.toUpperCase();
-			obj = await loadfile('json', "https://ch.tetr.io/api/users/" + namel);
+			obj = await loadjson("https://ch.tetr.io/api/users/" + namel);
 			if (obj.success == true) break;
-			if (name == param.streamer)
-				name = 'tu-tu';
-			else
-				name = param.streamer;
+			if (name == streamer) name = 'tu-tu';
+			else if (name == 'tu-tu') throw '錯誤';
+			else name = streamer;
 		}
 		let data = obj.data;
-		let data2 = (await loadfile('json', "https://ch.tetr.io/api/users/" + namel + '/records')).data;
+		let data2 = (await loadjson("https://ch.tetr.io/api/users/" + namel + '/records')).data;
 		let league = data.user.league;
 		let outarr = [];
 		if (league.rank != 'z') {

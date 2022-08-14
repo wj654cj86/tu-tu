@@ -1,4 +1,4 @@
-var 髮型 = {
+let 髮型 = {
 	短髮: 1,
 	長髮: 4,
 	馬尾: 4,
@@ -24,7 +24,7 @@ function 洗牌() {
 	}
 }
 洗牌();
-export default async function handler(req, res) {
+export default async function (req, res) {
 	let 抽髮型 = 保底表[順序++];
 	if (順序 >= 總和) {
 		順序 = 0;
