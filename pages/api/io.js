@@ -288,8 +288,8 @@ export default async function (req, res) {
 			nameu = name.toUpperCase();
 			obj = await loadjson("https://ch.tetr.io/api/users/" + namel);
 			if (obj.success == true) break;
-			if (name == streamer) name = 'tu-tu';
-			else if (name == 'tu-tu') throw '錯誤';
+			if (name == 'tu-tu') throw '錯誤';
+			else if (name == streamer) name = 'tu-tu';
 			else name = streamer;
 		}
 		let data = obj.data;
