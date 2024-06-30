@@ -97,8 +97,8 @@ export default async function (req, res) {
 				}
 			}
 		}
-		res.status(200).json(輸出);
+		res.status(200).send(輸出);
 	} catch (e) {
-		res.status(200).json('error');
+		res.status(200).send('error');
 	}
 }
