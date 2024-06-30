@@ -275,6 +275,7 @@ let languagedata = {
 let loadjson = url => fetch(url).then(r => r.json());
 
 export default async function (req, res) {
+	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 	let { language, streamer, name } = req.query;
 	try {
 		if (languages.indexOf(language) == -1) language = 'zh-TW';
@@ -324,8 +325,8 @@ export default async function (req, res) {
 		}
 		outarr.push(`${languagedata.page[language]}: https://ch.tetr.io/u/${namel}`);
 
-		res.status(200).json(`${nameu} => ` + outarr.join(', '));
+		res.status(200).send(`${nameu} => ` + outarr.join(', '));
 	} catch (e) {
-		res.status(200).json(`指令暫時錯誤，無法讀取IO官方資料。`);
+		res.status(200).send(`指令暫時錯誤，無法讀取IO官方資料。`);
 	}
 }
