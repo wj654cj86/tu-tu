@@ -273,55 +273,55 @@ let languagedata = {
 };
 
 let loadjson = url => fetch(url).then(r => r.json());
+let loadiodata = (name, mod) => loadjson(`https://ch.tetr.io/api/users/${name}/summaries/${mod}`).then(json => json.data);
 
 export default async function (req, res) {
 	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 	let { language, streamer, name } = req.query;
 	try {
 		if (languages.indexOf(language) == -1) language = 'zh-TW';
-		if (streamer === undefined || streamer == "" || streamer == "null") streamer = 'tu-tu';
-		if (name === undefined || name == "" || name == "null") name = streamer;
+		if (streamer === undefined || streamer == '' || streamer == 'null') streamer = 'tu-tu';
+		if (name === undefined || name == '' || name == 'null') name = streamer;
 		let namel;
 		let nameu;
 		let obj;
 		while (1) {
 			namel = name.toLowerCase();
 			nameu = name.toUpperCase();
-			obj = await loadjson("https://ch.tetr.io/api/users/" + namel);
+			obj = await loadjson(`https://ch.tetr.io/api/users/${namel}`);
 			if (obj.success == true) break;
 			if (name == 'tu-tu') throw '錯誤';
 			else if (name == streamer) name = 'tu-tu';
 			else name = streamer;
 		}
 		let data = obj.data;
-		let data2 = (await loadjson("https://ch.tetr.io/api/users/" + namel + '/records')).data;
-		let league = data.user.league;
+		let league = await loadiodata(namel, 'league');
 		let outarr = [];
 		if (league.rank != 'z') {
 			outarr.push(`${languagedata.rank[language]}: ${league.rank.toUpperCase()}`);
 		}
-		if (league.rating != -1) {
-			outarr.push(`TR: ${league.rating.toFixed(0)}`);
+		if (league.tr != -1) {
+			outarr.push(`TR: ${league.tr.toFixed(0)}`);
 			outarr.push(`Glicko: ${league.glicko.toFixed(0)}+${league.rd.toFixed(0)}`);
 		}
 		if (league.rank != 'z') {
 			outarr.push(`${languagedata.world[language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing + languagedata.名[language]}`);
-			if (data.user.country !== null) {
-				outarr.push(`${Countries[data.user.country][language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing_local + languagedata.名[language]}`);
+			if (data.country !== null) {
+				outarr.push(`${Countries[data.country][language] + languagedata.ranking[language]}: ${languagedata.第[language] + league.standing_local + languagedata.名[language]}`);
 			}
 		}
-		if (league.apm != null) {
+		if (league.tr != -1) {
 			outarr.push(`APM: ${league.apm}`);
 			outarr.push(`PPS: ${league.pps}`);
 			outarr.push(`VS: ${league.vs}`);
 		}
-		if (data2.records != null) {
-			if (data2.records['40l'].record != null) {
-				outarr.push(`${languagedata['40l'][language]}: ${(data2.records['40l'].record.endcontext.finalTime / 1000).toFixed(3)}s`);
-			}
-			if (data2.records['blitz'].record != null) {
-				outarr.push(`Blitz: ${data2.records['blitz'].record.endcontext.score.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") + languagedata.分[language]}`);
-			}
+		let l40 = await loadiodata(namel, '40l');
+		if (l40.rank != -1) {
+			outarr.push(`${languagedata['40l'][language]}: ${(l40.record.results.stats.finaltime / 1000).toFixed(3)}s`);
+		}
+		let blitz = await loadiodata(namel, 'blitz');
+		if (blitz.rank != -1) {
+			outarr.push(`Blitz: ${blitz.record.results.stats.score.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') + languagedata.分[language]}`);
 		}
 		outarr.push(`${languagedata.page[language]}: https://ch.tetr.io/u/${namel}`);
 

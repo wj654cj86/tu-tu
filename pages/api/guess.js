@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 function 出題() {
 	let v = [];
@@ -22,42 +22,41 @@ function 重複數字(猜測) {
 }
 
 export default async function (req, res) {
+	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 	let { bonus, points, streamer, player, answer, token, urlkey, key } = req.query;
 	try {
-		const supabase = createClient(
-			`https://${urlkey}.supabase.co`,
-			key
-		);
+		const supabase = createClient(`https://${urlkey}.supabase.co`, key);
 		let 獎金;
 		let 點數;
-		if (bonus === undefined || bonus == "" || bonus == "0") {
-			獎金 = "0";
+		if (bonus === undefined || bonus == '' || bonus == '0') {
+			獎金 = '0';
 		} else {
-			if (token === undefined || token == "") throw 'error';
+			if (token === undefined || token == '') throw 'error';
 			獎金 = bonus;
 		}
-		if (points === undefined || points == "") {
+		if (points === undefined || points == '') {
 			點數 = '點';
 		} else {
 			點數 = points;
 		}
-		if (streamer === undefined || streamer == "") throw 'error';
-		if (player === undefined || player == "") throw 'error';
-		let { data } = await supabase.from("guess").select();
+		if (streamer === undefined || streamer == '') throw 'error';
+		if (player === undefined || player == '') throw 'error';
+		let { data } = await supabase.from('guess').select();
 		let one = data.find(element => element.name == streamer);
 		if (one === undefined) {
 			one = { name: streamer, answer: 出題(), points: 點數 };
-			await supabase.from("guess").insert(one);
-			data = (await supabase.from("guess").select()).data;
+			await supabase.from('guess').insert(one);
+			data = (await supabase.from('guess').select()).data;
 			one = data.find(element => element.name == streamer);
 		}
+		let db_set = (data) => supabase.from('guess').update(data).match({ name: streamer });
 		if (點數 == '點') {
 			點數 = one.points;
 		} else if (點數 == 'reset') {
-			await supabase.from("guess").update({ points: '點' }).match({ name: streamer });
+			await db_set({ points: '點' });
 			點數 = '點';
 		} else {
-			await supabase.from("guess").update({ points: 點數 }).match({ name: streamer });
+			await db_set({ points: 點數 });
 		}
 		let 猜測 = answer;
 		let 輸出 = '';
@@ -71,16 +70,15 @@ export default async function (req, res) {
 		} else if (重複數字(猜測)) {
 			輸出 = '你給到重覆數字，不給你提示！';
 		} else {
-			let a = 0, b = 0;
+			let a = 0;
 			for (let i = 0; i < 4; i++)
 				if (猜測[i] == 答案[i])
 					a++;
-
+			let b = -a;
 			for (let i = 0; i < 4; i++)
 				for (let j = 0; j < 4; j++)
 					if (猜測[i] == 答案[j])
 						b++;
-			b -= a;
 			if (a != 0)
 				輸出 += `${a}A`;
 			if (b != 0)
@@ -88,8 +86,8 @@ export default async function (req, res) {
 			if (a == 0 && b == 0)
 				輸出 += '0A';
 			if (a == 4) {
-				await supabase.from("guess").update({ answer: 出題() }).match({ name: streamer });
-				if (獎金 == "0") {
+				await db_set({ answer: 出題() });
+				if (獎金 == '0') {
 					輸出 = `恭喜你猜中數字！`;
 				} else {
 					輸出 = `恭喜你猜中數字！獲得${獎金}${點數}！`;
@@ -99,6 +97,6 @@ export default async function (req, res) {
 		}
 		res.status(200).send(輸出);
 	} catch (e) {
-		res.status(200).send('error');
+		res.status(200).send('指令出錯，請聯絡管理員！');
 	}
 }
